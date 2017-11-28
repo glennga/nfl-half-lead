@@ -1,4 +1,10 @@
-""" This file holds functions to pull useful data from the PBP data-set. """
+""" This file holds functions to pull useful data from the PBP data-set. 
+
+Functions: is_team_leading_half(game_id, team, df)
+           halftime_score(game_id, df)
+           first_quarter_stats(game_id, df)
+           weeks_to_ids(df, week_space)
+"""
 
 import numpy as np
 

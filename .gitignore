@@ -101,5 +101,5 @@ ENV/
 .mypy_cache/
 
 *.idea
-scratch.py
+src/scratch.py
 
