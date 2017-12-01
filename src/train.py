@@ -4,6 +4,7 @@ Functions: train(df, feature_f, kernel='rbf', c=1.0)
            verify(df, feature_f, models)
 """
 
+import numpy as np
 from sklearn.svm import SVC
 
 from src import pull
@@ -51,7 +52,7 @@ def verify(df, feature_f, models):
     # Collect the game IDs for our verification data.
     verification_map = pull.weeks_to_ids(df, [2, 6, 10, 14])
 
-    # Store the results in dictionary of lists.
+    # Store the results in a dictionary of lists.
     results = {}
     list(map(lambda b: results.update({b: []}), list(verification_map.keys())))
 
@@ -61,7 +62,8 @@ def verify(df, feature_f, models):
 
         # If this is a correct prediction, we append a 1. Otherwise, append a 0.
         for game in verification_map[team]:
-            r = models[team].predict(feature_f(pull.first_quarter_stats(game, df), t))[0]
+            r = models[team].predict(np.array(
+                [feature_f(pull.first_quarter_stats(game, df), t)]))[0]
             results[team].append(1 if r == pull.is_team_leading_half(game, t, df) else 0)
 
     return results
