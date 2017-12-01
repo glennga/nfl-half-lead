@@ -45,25 +45,48 @@ def verify(df, feature_f, models):
     
     :param df: Pandas data-frame to work with. Should be the original.
     :param feature_f: Feature function used to train the given models.
-    :param models: Models to verify.
+    :param models: Models to test.
     :return: Dictionary of lists of results, existing in the space [0, 1]. 
     """
-
     # Collect the game IDs for our verification data.
-    verification_map = pull.weeks_to_ids(df, [2, 6, 10, 14])
+    test_map = pull.weeks_to_ids(df, [2, 6, 10, 14])
 
     # Store the results in a dictionary of lists.
     results = {}
-    list(map(lambda b: results.update({b: []}), list(verification_map.keys())))
+    list(map(lambda b: results.update({b: []}), list(test_map.keys())))
 
     # Predict each game in our verification map.
-    for team in list(verification_map.keys()):
+    for team in list(test_map.keys()):
         t = ['LA', 'STL'] if team == 'STL-LA' else (['JAC', 'JAX'] if team == 'JAC-JAX' else team)
 
         # If this is a correct prediction, we append a 1. Otherwise, append a 0.
-        for game in verification_map[team]:
+        for game in test_map[team]:
             r = models[team].predict(np.array(
                 [feature_f(pull.first_quarter_stats(game, df), t)]))[0]
             results[team].append(1 if r == pull.is_team_leading_half(game, t, df) else 0)
+
+    return results
+
+
+def test(df, feature_f, team, model):
+    """ Return a list of results, using the given model and feature function.
+
+    :param df: Pandas data-frame to work with. Should be the original.
+    :param feature_f: Feature function used to train the given model.
+    :param team: Name of the team whose model this is for.
+    :param model: Model to test.
+    :return: List of results, existing in the space [0, 1].
+    """
+    # Collect the game IDs for our testing data.
+    test_map = pull.weeks_to_ids(df, [4, 8, 12, 16])
+
+    # Some weird funkiness for LA and JAX.
+    t = ['LA', 'STL'] if team == 'STL-LA' else (['JAC', 'JAX'] if team == 'JAC-JAX' else team)
+
+    # If this is a correct prediction, we append a 1. Otherwise, append a 0.
+    results = []
+    for game in test_map[team]:
+        r = model.predict(np.array([feature_f(pull.first_quarter_stats(game, df), t)]))[0]
+        results.append(1 if r == pull.is_team_leading_half(game, t, df) else 0)
 
     return results

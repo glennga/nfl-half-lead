@@ -81,6 +81,7 @@ def weeks_to_ids(df, week_space):
                 'KC': [], 'MIA': [], 'MIN': [], 'NE': [], 'NO': [], 'NYG': [], 'NYJ': [],
                 'OAK': [], 'PHI': [], 'PIT': [], 'SD': [], 'SEA': [], 'SF': [], 'TB': [],
                 'TEN': [], 'WAS': []}
+    # team_map = {'ARI' : []}
 
     sid_f = df[['GameID', 'Season', 'HomeTeam', 'AwayTeam']].drop_duplicates()
 
