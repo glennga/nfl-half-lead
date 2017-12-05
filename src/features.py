@@ -8,6 +8,8 @@ Functions: offense_focus(df, team)
 
 import numpy as np
 
+import src.pull as pull
+
 
 class __Features:
     """ Generic feature class for half-time lead prediction given first-quarter performance. The 
@@ -156,9 +158,10 @@ def general_performance_focus(df, team):
     Touchdown -> Is the play a touchdown?
     InterceptionThrown -> Is pass intercepted?
     Reception -> Is reception recorded?
-    Fumble -> Did fumble occur (against offense)?
     Sack -> Is the play a sack (against offense)?
     FieldGoalResult -> Result of field goal => [No Good, Good, Blocked].
+    TeamLeading -> Is the team leading after the 1st quarter? 
+    StartWithBall -> Is the team starting with the ball in the 2nd quarter?
 
     :param df: Pandas data-frame for a specific game's first quarter.
     :param team: Which team to get features from. For teams that are dual-indexed, the user can 
@@ -171,5 +174,7 @@ def general_performance_focus(df, team):
         's_InterceptionThrown_Opposite': y[1]['InterceptionThrown'].sum(),
         's_Fumble': y[1]['Fumble'].sum(),
         's_Sack': y[1]['Sack'].sum(),
-        's_FieldGoalResult_Good': len(y[0][y[0]['FieldGoalResult'] == 'Good'])}),
+        's_FieldGoalResult_Good': len(y[0][y[0]['FieldGoalResult'] == 'Good']),
+        'i_TeamLeading': pull.is_team_leading_qtr(df, df['GameID'].iloc[0], team, 1),
+        'i_StartWithBall': pull.does_team_start_ball(df, df['GameID'].iloc[0], team, 2)}),
                       'forward-permute').as_list(team)

@@ -1,31 +1,33 @@
 """ This file holds functions to pull useful data from the PBP data-set. 
 
-Functions: is_team_leading_half(game_id, team, df)
-           halftime_score(game_id, df)
-           first_quarter_stats(game_id, df)
+Functions: is_team_leading_qtr(df, game_id, team, qtr)
+           does_team_start_ball(df, game_id, team, qtr)
+           halftime_score(df, game_id)
+           first_quarter_stats(df, game_id)
            weeks_to_ids(df, week_space)
 """
 
 import numpy as np
 
 
-def is_team_leading_half(game_id, team, df):
+def is_team_leading_qtr(df, game_id, team, qtr):
     """ Given the data frame and the game ID, return 1 if the given team is leading at the 
     half, otherwise 0. 
 
+    :param df: Pandas data frame to work with.
     :param game_id: ID of the game to return lead for.
     :param team: Team to return lead for. For teams that are dual-indexed, the user can enter a 
-    two-element list to check from. 
-    :param df: Pandas data frame to work with.
+        two-element list to check from. 
+    :param qtr: Quarter to check lead for.
     :return: 1 if the team is leading at the half. 0 otherwise. 
     """
-    half_f, u = df[(df['GameID'] == game_id) & (df['qtr'] == 2)], 1
-    score = half_f.tail(u)[['posteam', 'DefensiveTeam', 'PosTeamScore', 'DefTeamScore']]
+    qtr_f, u = df[(df['GameID'] == game_id) & (df['qtr'] == qtr)], 1
+    score = qtr_f.tail(u)[['posteam', 'DefensiveTeam', 'PosTeamScore', 'DefTeamScore']]
 
     # We find the first non-zero tail entry.
     while all(score.isnull().iloc[0]):
         u += 1
-        score = half_f.tail(u)[['posteam', 'DefensiveTeam', 'PosTeamScore', 'DefTeamScore']]
+        score = qtr_f.tail(u)[['posteam', 'DefensiveTeam', 'PosTeamScore', 'DefTeamScore']]
 
     # Handle both cases, where teams may be addressed with multiple keys.
     is_pos_team = (not isinstance(team, list) and score['posteam'].iloc[0] == team) or \
@@ -44,11 +46,39 @@ def is_team_leading_half(game_id, team, df):
         raise Exception('Team does not exist in game.')
 
 
-def halftime_score(game_id, df):
-    """ Given the data frame and the game ID, return the halftime score as another data frame.
+def does_team_start_ball(df, game_id, team, qtr):
+    """ Given the data frame and the game ID, return 1 if the given team will start with the ball 
+    for the given quarter, otherwise 0.
+    
+    :param df: Pandas data frame to work with.
+    :param game_id: ID of the game to return lead for.
+    :param team: Team to return ball start for. For teams that are dual-indexed, the user can 
+        enter a two-element list to check from. 
+    :param qtr: Quarter to check ball possession for.
+    :return: 1 if the team possesses the ball at the start of the given quarter. 0 otherwise.
+    """
+    qtr_f, u = df[(df['GameID'] == game_id) & (df['qtr'] == qtr)], 1
+    possession = qtr_f.head(u)[['posteam', 'DefensiveTeam']]
 
-    :param game_id: ID of the game to return the halftime score for.
+    # We find the first non-zero head entry.
+    while all(possession.isnull().iloc[0]):
+        u += 1
+        possession = qtr_f.head(u)['posteam']
+
+    # Handle cases where teams may be addressed with multiple keys.
+    is_pos_team = (not isinstance(team, list) and possession['posteam'].iloc[0] == team) or \
+                  ((isinstance(team, list) and len(team) == 2) and
+                   (possession['posteam'].iloc[0] == team[0] or
+                    possession['posteam'].iloc[0] == team[1]))
+
+    return is_pos_team
+
+
+def halftime_score(df, game_id):
+    """ Given the data frame and the game ID, return the halftime score as another data frame.
+    
     :param df: Pandas data frame to work with. 
+    :param game_id: ID of the game to return the halftime score for.
     :return: The half time score as another data frame, with attributes for the team and their 
     score in terms of possession.  
     """
@@ -56,12 +86,12 @@ def halftime_score(game_id, df):
     return half_f.tail(1)[['posteam', 'DefensiveTeam', 'PosTeamScore', 'DefTeamScore']]
 
 
-def first_quarter_stats(game_id, df):
+def first_quarter_stats(df, game_id):
     """ Given the data frame and the game ID, return the first quarter data as another data 
     frame.
 
-    :param game_id: ID of the game to return the first quarter score.
     :param df: Pandas data frame to work with.
+    :param game_id: ID of the game to return the first quarter score.
     :return: All data related to the first quarter of this game. 
     """
     return df[(df['GameID'] == game_id) & (df['qtr'] == 1)]
