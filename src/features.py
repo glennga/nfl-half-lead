@@ -176,5 +176,5 @@ def general_performance_focus(df, team):
         's_Sack': y[1]['Sack'].sum(),
         's_FieldGoalResult_Good': len(y[0][y[0]['FieldGoalResult'] == 'Good']),
         'i_TeamLeading': pull.is_team_leading_qtr(df, df['GameID'].iloc[0], team, 1),
-        'i_StartWithBall': pull.does_team_start_ball(df, df['GameID'].iloc[0], team, 2)}),
+        'i_StartWithBall': pull.does_team_start_ball(df, df['GameID'].iloc[0], team)}),
                       'forward-permute').as_list(team)

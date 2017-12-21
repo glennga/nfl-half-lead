@@ -46,7 +46,7 @@ def is_team_leading_qtr(df, game_id, team, qtr):
         raise Exception('Team does not exist in game.')
 
 
-def does_team_start_ball(df, game_id, team, qtr):
+def does_team_start_ball(df, game_id, team):
     """ Given the data frame and the game ID, return 1 if the given team will start with the ball 
     for the given quarter, otherwise 0.
     
@@ -54,14 +54,13 @@ def does_team_start_ball(df, game_id, team, qtr):
     :param game_id: ID of the game to return lead for.
     :param team: Team to return ball start for. For teams that are dual-indexed, the user can 
         enter a two-element list to check from. 
-    :param qtr: Quarter to check ball possession for.
     :return: 1 if the team possesses the ball at the start of the given quarter. 0 otherwise.
     """
-    qtr_f, u = df[(df['GameID'] == game_id) & (df['qtr'] == qtr)], 1
+    qtr_f, u = df[(df['GameID'] == game_id)], 1
     possession = qtr_f.head(u)[['posteam', 'DefensiveTeam']]
 
     # We find the first non-zero head entry.
-    while all(possession.isnull().iloc[0]):
+    while all(qtr_f.head(u).iloc[0].isnull()):
         u += 1
         possession = qtr_f.head(u)['posteam']
 
@@ -71,7 +70,8 @@ def does_team_start_ball(df, game_id, team, qtr):
                    (possession['posteam'].iloc[0] == team[0] or
                     possession['posteam'].iloc[0] == team[1]))
 
-    return is_pos_team
+    # The possession team here is not the possessing team for the next.
+    return not is_pos_team
 
 
 def halftime_score(df, game_id):
