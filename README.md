@@ -1,3 +1,5 @@
+<img class="ui image" src="https://static01.nyt.com/images/2017/10/09/sports/09nfl-davante/09nfl-davante-superJumbo.jpg">
+
 # Abstract
 In this project I train support vector machines (SVMs) to predict if a National Football League (NFL) team will be leading at the half or not, given the results of the first quarter. For each team, I train a SVM using the optimal hyperparameters and features for prediction. The results show that the optimal classifying model for each team is, on average, 17.6% better than flipping a coin.
 
